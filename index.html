@@ -296,6 +296,13 @@ const KEY_OF = { settings: 'key' };
 // Mematikan engine localStorage bawaan agar tidak error
 function scheduleSave() {}
 function _loadFromStorage() { return true; }
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+const now = () => new Date().toISOString();
 
 // --- Konektor Supabase ---
 function txGet(storeName, id) {
