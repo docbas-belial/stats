@@ -208,6 +208,7 @@ tbody tr:hover td { background: rgba(59,130,246,0.05); }
 .input-search:focus { border-color: var(--accent-primary); }
 .player-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-elevated); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--accent-primary); flex-shrink: 0; }
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -282,98 +283,44 @@ const state = {
 // All data lives in _mem{} and is flushed to localStorage on
 // every write. On boot, data is rehydrated from localStorage.
 // ============================================================
-const STORE_NAMES = [
-  'players','seasons','competitions','matches','match_rosters',
-  'game_events','period_scores','player_match_stats','team_match_stats',
-  'backup_history','audit_log','settings',
-];
-
+const STORE_NAMES = ['players','seasons','competitions','matches','match_rosters','game_events','period_scores','player_match_stats','team_match_stats','backup_history','audit_log','settings'];
 const STORES = Object.fromEntries(STORE_NAMES.map(s => [s, true]));
 
-// In-memory store: { storeName: { id: record, … } }
-const _mem = {};
-for (const s of STORE_NAMES) _mem[s] = {};
+// Masukkan URL dan API KEY Supabase Anda di bawah ini
+const SUPABASE_URL = 'https://qnqzsghvzoxhfxenmtzg.supabase.co/rest/v1/';
+const SUPABASE_KEY = 'sb_publishable_ZtFmxhWJ0yiOXeUgARr8rw_8cDnkQQn;
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// keyPath per store
-const KEY_OF = {
-  players:'id', seasons:'id', competitions:'id', matches:'id',
-  match_rosters:'id', game_events:'id', period_scores:'id',
-  player_match_stats:'id', team_match_stats:'id',
-  backup_history:'id', audit_log:'id', settings:'key',
-};
+const KEY_OF = { settings: 'key' };
 
-function uuid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0;
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-  });
-}
-const now = () => new Date().toISOString();
+// Mematikan engine localStorage bawaan agar tidak error
+function scheduleSave() {}
+function _loadFromStorage() { return true; }
 
-// --- Persist to localStorage (debounced 300 ms) ---
-let _saveTimer = null;
-function scheduleSave() {
-  if (_saveTimer) clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(_persistNow, 300);
-}
-function _persistNow() {
-  try {
-    const payload = JSON.stringify(_mem);
-    localStorage.setItem(LS_KEY, payload);
-  } catch (e) {
-    console.warn('[BSM] localStorage save failed:', e.message);
-  }
-}
-
-// --- Load from localStorage ---
-function _loadFromStorage() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return false;
-    const parsed = JSON.parse(raw);
-    for (const s of STORE_NAMES) {
-      if (parsed[s]) _mem[s] = parsed[s];
-    }
-    return true;
-  } catch (e) {
-    console.warn('[BSM] localStorage load failed:', e.message);
-    return false;
-  }
-}
-
-// --- CRUD helpers (sync in-memory, async API for compatibility) ---
+// --- Konektor Supabase ---
 function txGet(storeName, id) {
-  return Promise.resolve(_mem[storeName]?.[id] ?? null);
+  const key = KEY_OF[storeName] || 'id';
+  return supabase.from(storeName).select('*').eq(key, id).single().then(({ data }) => data || null);
 }
 function txPut(storeName, obj) {
-  const key = KEY_OF[storeName] || 'id';
-  const id  = obj[key];
-  _mem[storeName][id] = obj;
-  scheduleSave();
-  return Promise.resolve(obj);
+  return supabase.from(storeName).upsert(obj).then(() => obj);
 }
 function txDelete(storeName, id) {
-  delete _mem[storeName][id];
-  scheduleSave();
-  return Promise.resolve();
+  const key = KEY_OF[storeName] || 'id';
+  return supabase.from(storeName).delete().eq(key, id).then(() => {});
 }
 function txGetAll(storeName, indexField, value) {
-  const all = Object.values(_mem[storeName] || {});
-  if (indexField !== undefined && value !== undefined) {
-    return Promise.resolve(all.filter(r => r[indexField] === value));
-  }
-  return Promise.resolve(all);
+  let query = supabase.from(storeName).select('*').limit(10000);
+  if (indexField !== undefined && value !== undefined) query = query.eq(indexField, value);
+  return query.then(({ data }) => data || []);
 }
 function txMultiPut(storeName, objs) {
-  const key = KEY_OF[storeName] || 'id';
-  for (const obj of objs) _mem[storeName][obj[key]] = obj;
-  scheduleSave();
-  return Promise.resolve();
+  if (!objs || !objs.length) return Promise.resolve();
+  return supabase.from(storeName).upsert(objs).then(() => {});
 }
 function txClear(storeName) {
-  _mem[storeName] = {};
-  scheduleSave();
-  return Promise.resolve();
+  const key = KEY_OF[storeName] || 'id';
+  return supabase.from(storeName).delete().neq(key, 'delete-all').then(() => {});
 }
 
 // --- Settings shortcuts ---
