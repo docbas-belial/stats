@@ -303,7 +303,6 @@ function uuid() {
   });
 }
 const now = () => new Date().toISOString();
-
 // --- Konektor Supabase ---
 function txGet(storeName, id) {
   const key = KEY_OF[storeName] || 'id';
