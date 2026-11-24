@@ -18,6 +18,8 @@ const state = {
   selectedMatchId: null,
   bsView: 'list',          // Box Score: 'list' (daftar pertandingan) | 'detail'
   bsCompetition: null,     // Box Score: filter kompetisi
+  dashSeason: '',          // Dashboard: filter season (id atau '')
+  dashTeam: '',            // Dashboard: filter opponent team (nama lawan atau '')
   lastBackup: null,
   dbReady: false,
   dbError: null,
