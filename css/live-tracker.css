@@ -1,0 +1,21 @@
+/* Live tracker specific */
+.court-half { background: var(--bg-elevated); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 20px; position: relative; min-height: 200px; }
+.player-btn { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px 12px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text-primary); transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 70px; }
+.player-btn:hover { border-color: var(--accent-primary); background: rgba(59,130,246,0.1); }
+.player-btn.selected { border-color: var(--accent-primary); background: rgba(59,130,246,0.2); color: var(--accent-primary); }
+.player-btn .jersey { font-size: 18px; font-weight: 800; }
+.player-btn .name { font-size: 10px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 68px; }
+.event-btn { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 8px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--text-primary); transition: all 0.15s; text-align: center; line-height: 1.3; }
+.event-btn:hover { border-color: var(--accent-secondary); background: rgba(245,158,11,0.1); color: var(--accent-secondary); }
+.event-btn.made { border-color: rgba(16,185,129,0.4); }
+.event-btn.made:hover { border-color: var(--accent-success); background: rgba(16,185,129,0.1); color: var(--accent-success); }
+.event-btn.missed { border-color: rgba(239,68,68,0.4); }
+.event-btn.missed:hover { border-color: var(--accent-danger); background: rgba(239,68,68,0.1); color: var(--accent-danger); }
+.score-display { font-size: 56px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.quarter-badge { background: rgba(59,130,246,0.2); color: var(--accent-primary); padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.event-log { max-height: 280px; overflow-y: auto; }
+.event-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border-subtle); font-size: 12px; }
+.event-row:last-child { border-bottom: none; }
+.event-time { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); width: 50px; flex-shrink: 0; }
+.event-type { flex: 1; color: var(--text-primary); }
+.event-player { color: var(--text-secondary); font-size: 11px; }
